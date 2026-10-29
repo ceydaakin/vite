@@ -761,12 +761,14 @@ export async function _createServer(
       if (serverConfig.hmr !== false && module.file) {
         // TODO: Should we also update the node moduleGraph for backward compatibility?
         const environmentModule = (module._clientModule ?? module._ssrModule)!
-        updateModules(
-          environments[environmentModule.environment]!,
-          module.file,
-          [environmentModule],
-          monotonicDateNow(),
+        const environment = environments[environmentModule.environment]!
+        const timestamp = monotonicDateNow()
+        environment.moduleGraph.invalidateModule(
+          environmentModule,
+          new Set(),
+          timestamp,
         )
+        updateModules(environment, module.file, [environmentModule], timestamp)
       }
     },
     async listen(port?: number, isRestart?: boolean) {

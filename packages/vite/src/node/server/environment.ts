@@ -293,7 +293,10 @@ export class DevEnvironment extends BaseEnvironment {
 
   async reloadModule(module: EnvironmentModuleNode): Promise<void> {
     if (this.config.server.hmr !== false && module.file) {
-      updateModules(this, module.file, [module], monotonicDateNow())
+      const timestamp = monotonicDateNow()
+      // Like a file change, so a transform already in flight is not reused or cached
+      this.moduleGraph.invalidateModule(module, new Set(), timestamp)
+      updateModules(this, module.file, [module], timestamp)
     }
   }
 
